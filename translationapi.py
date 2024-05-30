@@ -12,16 +12,22 @@ def home():
 def api_translation():
     tokenizer = AutoTokenizer.from_pretrained("facebook/nllb-200-distilled-600M")
     model = AutoModelForSeq2SeqLM.from_pretrained("facebook/nllb-200-distilled-600M")
-    getarticle = request.get_json()
     article = """you've gotta dance like theres nobody watching,
     Love like you'll never be hurt,
     Sing like there's nobody listening,
     And live like it's heaven on earth"""
+    getjson = request.get_json()
+    sen = getjson.get('sen', '')
+    tlang =getjson.get('tlang', '')
+    with open("languageslist.txt",'r') as file:
+        f = file.read()
+        tokentlang = f[f.find(tlang) + len(tlang):]
+        tokentlang = tokentlang[1:tokentlang.find('\n')]
     #print(article)
-    inputs = tokenizer(getarticle, return_tensors="pt")
-    translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id["heb_Hebr"], max_length=500)
+    inputs = tokenizer(sen, return_tensors="pt")
+    translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id[tokentlang], max_length=500)
     #print(tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0])
-    translation = string(tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0])
+    translation = (tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]).join()
     return  jsonify(translation)@app.route('/', methods=['GET'])
 
 if __name__ == '__main__':
