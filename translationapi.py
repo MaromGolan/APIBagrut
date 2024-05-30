@@ -12,10 +12,6 @@ def home():
 def api_translation():
     tokenizer = AutoTokenizer.from_pretrained("facebook/nllb-200-distilled-600M")
     model = AutoModelForSeq2SeqLM.from_pretrained("facebook/nllb-200-distilled-600M")
-    article = """you've gotta dance like theres nobody watching,
-    Love like you'll never be hurt,
-    Sing like there's nobody listening,
-    And live like it's heaven on earth"""
     getjson = request.get_json()
     sen = getjson.get('sen', '')
     tlang =getjson.get('tlang', '')
@@ -46,7 +42,11 @@ if __name__ == '__main__':
 
 
 
-
+#article = """you've gotta dance like theres nobody watching,
+#    Love like you'll never be hurt,
+#    Sing like there's nobody listening,
+#    And live like it's heaven on earth"""
+    
 
 #@article{nllb2022,
  # title={No Language Left Behind: Scaling Human-Centered Machine Translation},
