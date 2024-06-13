@@ -1,40 +1,37 @@
 from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
-import flask
-from flask import request, jsonify
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-app = flask.Flask(__name__)
+
+app = Flask(__name__)
 CORS(app)
 
 @app.route('/', methods=['GET'])
 def home():
     return '''<h1>RAVELTRANSLATE</h1>
-                <p> Ravel-Translate's Translator   </p>'''
+              <p>Ravel-Translate's Translator</p>'''
 
+@app.route('/api_translation', methods=['POST'])
 def api_translation():
-    tokenizer = AutoTokenizer.from_pretrained("facebook/nllb-200-distilled-600M")
-    model = AutoModelForSeq2SeqLM.from_pretrained("facebook/nllb-200-distilled-600M")
-    getjson = request.get_json()
-    sen = getjson.get('sen', '')
-    tlang =getjson.get('tlang', '')
-    with open("languageslist.txt",'r') as file:
-        f = file.read()
-        tokentlang = f[f.find(tlang) + len(tlang):]
-        tokentlang = tokentlang[1:tokentlang.find('\n')]
-    #print(article)
-    inputs = tokenizer(sen, return_tensors="pt")
-    translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id[tokentlang], max_length=500)
-    #print(tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0])
-    translation = (tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]).join()
-    return  jsonify(translation)@app.route('/', methods=['GET'])
-
+    try:
+        tokenizer = AutoTokenizer.from_pretrained("facebook/nllb-200-distilled-600M")
+        model = AutoModelForSeq2SeqLM.from_pretrained("facebook/nllb-200-distilled-600M")
+        getjson = request.get_json()
+        sen = getjson.get('sen', '')
+        tlang = getjson.get('tlang', '')
+        with open("languageslist.txt", 'r') as file:
+            f = file.read()
+            tokentlang = f[f.find(tlang) + len(tlang):]
+            tokentlang = tokentlang[1:tokentlang.find('\n')]
+        inputs = tokenizer(sen, return_tensors="pt")
+        translated_tokens = model.generate(**inputs, forced_bos_token_id=tokenizer.lang_code_to_id[tokentlang], max_length=500)
+        translation = tokenizer.batch_decode(translated_tokens, skip_special_tokens=True)[0]
+        print(translation)
+        return jsonify({'translation': translation})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 400
+    
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5000)
-
-
-
-
-
-
 
 
 
